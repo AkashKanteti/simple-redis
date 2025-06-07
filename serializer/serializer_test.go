@@ -5,7 +5,7 @@ import (
 	"testing"
 )
 
-func TestDeserializer(t *testing.T) {
+func TestSerializer(t *testing.T) {
 	t.Run("simple string", func(t *testing.T) {
 		assert.Equal(t, "+hello world\r\n", deserializeString("hello world"))
 	})
