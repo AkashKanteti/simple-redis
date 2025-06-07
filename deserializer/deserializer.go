@@ -2,11 +2,12 @@ package deserializer
 
 import (
 	"errors"
+	"strconv"
 )
 
 const CRLF = `\r\n`
 
-func deserialize(payload string) (string, error) {
+func deserialize(payload string) (interface{}, error) {
 	switch payload[0] {
 	case '+':
 		idx, err := fetchCrlf(payload)
@@ -21,6 +22,16 @@ func deserialize(payload string) (string, error) {
 		}
 		return payload[1:idx], nil
 	case ':':
+		idx, err := fetchCrlf(payload)
+		if err != nil {
+			return "", err
+		}
+		
+		if payload[1:idx] == "" {
+			return "", errors.New("empty int request")
+		}
+
+		return strconv.Atoi(payload[1:idx])
 	case '$':
 	case '*':
 

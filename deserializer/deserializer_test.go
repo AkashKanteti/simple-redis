@@ -24,3 +24,22 @@ func TestSimpleString(t *testing.T) {
 		assert.Error(t, err)
 	})
 }
+
+func TestInteger(t *testing.T) {
+	t.Run("when positive integer is given, avg case", func(t *testing.T) {
+		result, err := deserialize(`:123\r\n`)
+		assert.Equal(t, 123, result)
+		assert.NoError(t, err)
+	})
+
+	t.Run("when positive integer is given, avg case", func(t *testing.T) {
+		result, err := deserialize(`:-123\r\n`)
+		assert.Equal(t, -123, result)
+		assert.NoError(t, err)
+	})
+
+	t.Run("when positive integer is given, avg case", func(t *testing.T) {
+		_, err := deserialize(`:\r\n`)
+		assert.Error(t, err)
+	})
+}
