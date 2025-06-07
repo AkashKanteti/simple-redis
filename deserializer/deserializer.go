@@ -15,6 +15,11 @@ func deserialize(payload string) (string, error) {
 		}
 		return payload[1:idx], nil
 	case '-':
+		idx, err := fetchCrlf(payload)
+		if err != nil {
+			return "", err
+		}
+		return payload[1:idx], nil
 	case ':':
 	case '$':
 	case '*':
