@@ -2,6 +2,7 @@ package deserializer
 
 import (
 	"errors"
+	"fmt"
 	"strconv"
 )
 
@@ -30,33 +31,37 @@ func deserialize(payload string) (interface{}, error) {
 	default:
 		return "", errors.New("invalid data type determination")
 	}
-
-	return "", nil
 }
 
 func handleArray(payload string) (interface{}, error) {
-	idx := 1
+	idx := 1 // for forwarding type signal
 
-	if payload[idx:idx+2] == "-1" {
+	// re-use string method
+	sizeString, err := getString(payload)
+	if err != nil {
+		return nil, err
+	}
+
+	size, err := strconv.Atoi(sizeString)
+	if err != nil {
+		return nil, err
+	}
+
+	// base cases for nil and 0 strings
+	if size == 0 {
+		return "", nil
+	} else if size == -1 {
 		return nil, nil
 	}
 
-	resultLen := int(payload[idx+1])
-	if resultLen == 0 {
-		return []string{}, nil
-	}
-	idx += 1
+	// size and CLRF
+	idx += len(sizeString) + 4
 
-	// check starting CRLF
-	if !checkCrlf(payload, idx) {
-		return nil, errors.New("invalid starting CRLF")
-	}
-	idx += 4
-
-	result := make([]string, resultLen)
+	result := make([]string, size)
 	currIdx := 0
-	for _ = range resultLen {
+	for _ = range size {
 		currElement, nextIdx, err := handleBulkString(payload, idx)
+		fmt.Printf("%v\n", currElement)
 		if err != nil {
 			return nil, err
 		}
@@ -87,30 +92,40 @@ func getString(payload string) (string, error) {
 }
 
 func handleBulkString(payload string, idx int) (interface{}, int, error) {
-	idx += 1 // for forwarding type signal
-	if payload[idx:idx+2] == "-1" {
+	// re-use string method
+	sizeString, err := getString(payload[idx:])
+	if err != nil {
+		return nil, -1, err
+	}
+	idx += 1
+
+	size, err := strconv.Atoi(sizeString)
+	if err != nil {
+		return nil, -1, err
+	}
+
+	// base cases for nil and 0 strings
+	if size == 0 {
+		return "", idx + 5, nil
+	} else if size == -1 {
 		return nil, idx + 2, nil
 	}
 
-	resultLen := int(payload[idx])
-	idx += 1
+	// size and CLRF
+	idx += len(sizeString) + 4
+	result := payload[idx : idx+size]
 
-	resultLen += 1 // 0 based sizes
+	// string payload length
+	idx += size
 
-	// check starting CRLF
+	// check ending CLRF
 	if !checkCrlf(payload, idx) {
-		return nil, idx, errors.New("invalid starting CRLF")
+		return nil, -1, errors.New("invalid starting CRLF")
 	}
+
+	// return next element start index
 	idx += 4
-
-	if resultLen == 0 {
-		return "", idx, nil
-	}
-
-	//check actual payload
-	result := payload[idx+5 : idx+5+resultLen]
-
-	return result, idx + 5 + resultLen, nil
+	return result, idx, nil
 }
 
 func checkCrlf(payload string, idx int) bool {
