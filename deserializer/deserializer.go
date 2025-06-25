@@ -8,7 +8,7 @@ import (
 
 const CRLF = `\r\n`
 
-func deserialize(payload string) (interface{}, error) {
+func Deserialize(payload string) (interface{}, error) {
 	switch payload[0] {
 	case '+', '-':
 		return getString(payload)
