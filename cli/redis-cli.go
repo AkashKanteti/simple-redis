@@ -3,31 +3,31 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/AkashKanteti/simple-redis/serializer"
-	"net/http"
+	"net"
 	"os"
-	"strings"
 )
 
 func main() {
-	for {
-		reader := bufio.NewReader(os.Stdin)
-		text, err := reader.ReadString('\n')
-		if err != nil {
-			fmt.Printf("%v", err)
-		}
+	conn, err := net.Dial("tcp", ":6969")
 
-		if text == "exit\n" {
-			break
-		}
-
-		cmds := strings.Split(strings.TrimSpace(text), " ")
-
-		resp, err := http.Post("localhost:6379", "application/json", strings.NewReader(serializer.SerializeArray(cmds)))
-		if err != nil {
-			fmt.Printf("%v", err)
-		}
-
-		fmt.Println(resp.Body)
+	reader := bufio.NewReader(os.Stdin)
+	text, err := reader.ReadString('\n')
+	if err != nil {
+		fmt.Printf("%v", err)
 	}
+
+	//cmds := strings.Split(strings.TrimSpace(text), " ")
+
+	_, err = conn.Write([]byte(text))
+	if err != nil {
+		fmt.Printf("%v", err)
+	}
+
+	var buf = make([]byte, 1024)
+	n, err := conn.Read(buf)
+	if err != nil {
+		fmt.Printf("%v", err)
+	}
+
+	fmt.Print(string(buf[:n]))
 }
