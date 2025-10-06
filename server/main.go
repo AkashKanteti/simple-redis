@@ -6,7 +6,11 @@ import (
 	"strings"
 )
 
+var store map[string]string
+
 func main() {
+	store = make(map[string]string)
+
 	listener, err := net.Listen("tcp", ":6969")
 	if err != nil {
 		log.Fatal(err)
@@ -48,7 +52,20 @@ func commandMux(cmd string) string {
 		return "PONG"
 	case "ECHO":
 		return strings.Join(cmdArr[1:], " ")
+	case "SET":
+		return handleSet(cmdArr[1:])
+	case "GET":
+		return handleGet(cmdArr[1:])
 	}
 
 	return ""
+}
+
+func handleSet(cmd []string) string {
+	store[cmd[0]] = cmd[1]
+	return "OK"
+}
+
+func handleGet(cmd []string) string {
+	return store[cmd[0]]
 }
