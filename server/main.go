@@ -3,7 +3,8 @@ package main
 import (
 	"log"
 	"net"
-	"strings"
+
+	"github.com/AkashKanteti/simple-redis/deserializer"
 )
 
 var store map[string]string
@@ -42,20 +43,26 @@ func handleFunction(conn net.Conn) {
 	conn.Write([]byte(resp))
 }
 
-func commandMux(cmd string) string {
-	cmd = strings.TrimSpace(cmd)
+func commandMux(resp string) string {
+	//cmd = strings.TrimSpace(cmd)
 
-	cmdArr := strings.Split(cmd, " ")
+	cmd, err := deserializer.Deserialize(resp)
 
-	switch cmdArr[0] {
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var deserializedCmd = cmd.(deserializer.Deserializer)
+
+	switch deserializedCmd.Cmd {
 	case "PING":
 		return "PONG"
-	case "ECHO":
-		return strings.Join(cmdArr[1:], " ")
-	case "SET":
-		return handleSet(cmdArr[1:])
-	case "GET":
-		return handleGet(cmdArr[1:])
+		//case "ECHO":
+		//	return strings.Join(cmdArr[1:], " ")
+		//case "SET":
+		//	return handleSet(cmdArr[1:])
+		//case "GET":
+		//	return handleGet(cmdArr[1:])
 	}
 
 	return ""

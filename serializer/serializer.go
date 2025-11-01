@@ -2,7 +2,7 @@ package serializer
 
 import "fmt"
 
-func serializeString(payload string) string {
+func SerializeString(payload string) string {
 	return fmt.Sprintf("+%s\r\n", payload)
 }
 

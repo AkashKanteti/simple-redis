@@ -1,13 +1,14 @@
 package serializer
 
 import (
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestSerializer(t *testing.T) {
 	t.Run("simple string", func(t *testing.T) {
-		assert.Equal(t, "+hello world\r\n", serializeString("hello world"))
+		assert.Equal(t, "+hello world\r\n", SerializeString("hello world"))
 	})
 
 	t.Run("simple error", func(t *testing.T) {

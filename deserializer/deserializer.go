@@ -6,12 +6,24 @@ import (
 	"strconv"
 )
 
-const CRLF = `\r\n`
+const CRLF = "\r\n"
+
+type Deserializer struct {
+	Cmd    string
+	result *interface{}
+}
 
 func Deserialize(payload string) (interface{}, error) {
 	switch payload[0] {
 	case '+', '-':
-		return getString(payload)
+		result, err := getString(payload)
+		if err != nil {
+			return Deserializer{}, err
+		}
+		return Deserializer{
+			Cmd:    result,
+			result: nil,
+		}, nil
 	case ':':
 		result, err := getString(payload)
 		if err != nil {
@@ -73,10 +85,11 @@ func handleArray(payload string) (interface{}, error) {
 }
 func fetchCrlf(payload string) (int, error) {
 	for k := range payload {
-		if k+4 > len(payload) {
+		if k+2 > len(payload) {
 			break
 		}
-		if payload[k:k+4] == CRLF {
+
+		if payload[k:k+2] == CRLF {
 			return k, nil
 		}
 	}

@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"net"
 	"os"
+	"strings"
+
+	"github.com/AkashKanteti/simple-redis/serializer"
 )
 
 func main() {
@@ -16,9 +19,11 @@ func main() {
 		fmt.Printf("%v", err)
 	}
 
-	//cmds := strings.Split(strings.TrimSpace(text), " ")
+	text = strings.TrimSpace(text)
+	// serialize using risp protocol
+	serializedText := serializer.SerializeString(text)
 
-	_, err = conn.Write([]byte(text))
+	_, err = conn.Write([]byte(serializedText))
 	if err != nil {
 		fmt.Printf("%v", err)
 	}
