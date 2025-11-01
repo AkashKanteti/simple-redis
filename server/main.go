@@ -67,5 +67,8 @@ func handleSet(cmd []string) string {
 }
 
 func handleGet(cmd []string) string {
-	return store[cmd[0]]
+	if result, ok := store[cmd[0]]; ok {
+		return result
+	}
+	return "Not Found"
 }
